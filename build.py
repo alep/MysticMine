@@ -8,7 +8,7 @@ from PIL import Image, ImageSequence
 import monorail.koon.build as build
 import monorail.koon.cfg as cfg
 
-print "Updating data from assets..."
+print("Updating data from assets...")
 
 CONFIGFILE = "data/800x600/resources.cfg"
 

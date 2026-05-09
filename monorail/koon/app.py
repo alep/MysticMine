@@ -5,8 +5,8 @@ import gc
 import pygame
 from pygame.locals import *
 
-from input import *
-import snd
+from .input import *
+from . import snd
 
 TICKS_PER_SECOND = 25
 GAMETICKS = 1000 / TICKS_PER_SECOND
@@ -106,7 +106,7 @@ class Game:
 
         except:
             self.deinit_pygame()
-            print "Unexpected error:", sys.exc_info()[0]
+            print("Unexpected error:", sys.exc_info()[0])
             raise
 
     def handle_events( self ):

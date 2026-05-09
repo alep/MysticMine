@@ -1,6 +1,5 @@
 import copy
-import tiles
-import pickups
+from monorail import tiles, pickups
 
 cdef class AiNode #forward declaration
 
@@ -116,7 +115,7 @@ cdef class Node:
                child._best_score > self._best_score:
                 self._best_score = child._best_score
 
-        if self._best_score <> old_score and \
+        if self._best_score != old_score and \
            self.parent is not None:
             self.parent._recalc_best_score()                    
 
@@ -188,10 +187,10 @@ cdef class PredictionTree:
         cdef int cycles_left
         
         if self.root_node is not None:
-            cycles_left = self.CYCLES_PER_UPDATE*2/3 # We make sure we calculate all in limited time
+            cycles_left = self.CYCLES_PER_UPDATE*2//3 # We make sure we calculate all in limited time
             cycles_left = self._update_tree( cycles_left )
             
-            cycles_left = cycles_left + self.CYCLES_PER_UPDATE*1/3
+            cycles_left = cycles_left + self.CYCLES_PER_UPDATE*1//3
             cycles_left = self._calc_nodes_scores( cycles_left )
             
             self._update_tree( cycles_left )
@@ -265,7 +264,7 @@ cdef class PredictionTree:
             node = self.leafs.pop(0)
 ##            node.set_score( node.calc_score() )
             gen = node.get_generation( self.root_node )
-            if gen <> -1: # else it's a leaf of old root_node
+            if gen != -1: # else it's a leaf of old root_node
                 self.total_generations = gen - 1
                 nodes = node.generate_childeren()
                 self.node_cnt = self.node_cnt + len(nodes)
@@ -417,7 +416,7 @@ cdef class AiNode:
         node = self
 
         if node.playfieldstate is None:
-            print "playfieldstate shouldn't be None in real game"
+            print("playfieldstate shouldn't be None in real game")
             return 0
 
         score = 0
@@ -438,7 +437,7 @@ cdef class AiNode:
         
         score = 0
         
-        if node.playfieldstate.get_pickup( node.trailnode.tile ) <> None:
+        if node.playfieldstate.get_pickup( node.trailnode.tile ) != None:
             if isinstance(node.trailnode.tile.pickup, pickups.CopperCoin):
                 score = 1
             elif isinstance(node.trailnode.tile.pickup, pickups.GoldBlock):
