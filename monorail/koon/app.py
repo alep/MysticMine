@@ -1,6 +1,7 @@
 
 import sys
 import gc
+import asyncio
 
 import pygame
 from pygame.locals import *
@@ -32,10 +33,8 @@ class Game:
 
         self.userinput = UserInput()
 
-        if not self.config.is_fullscreen:
-            pygame.display.set_mode( self.config.resolution )
-        else:
-            pygame.display.set_mode( self.config.resolution, pygame.FULLSCREEN )
+        flags = pygame.FULLSCREEN if (self.config.is_fullscreen and sys.platform != "emscripten") else 0
+        pygame.display.set_mode( self.config.resolution, flags )
         pygame.display.set_caption( self.name )
 
         # Init the input
@@ -55,6 +54,9 @@ class Game:
         pass
 
     def run( self ):
+        asyncio.run( self._run_async() )
+
+    async def _run_async( self ):
         try:
             self.init_pygame()
 
@@ -83,8 +85,6 @@ class Game:
                     next_game_tick += GAMETICKS
                     loop_count += 1
 
-##                    gc.collect()
-
                 if loop_count >= 4: # don't overdo the ticks
                     next_game_tick = pygame.time.get_ticks()
 
@@ -99,6 +99,8 @@ class Game:
                     self.fps = 2 * frame_count
                     frame_count = 0
                     next_half_second += 500
+
+                await asyncio.sleep(0)
 
             self.after_gameloop()
 
@@ -129,7 +131,7 @@ class Game:
                 self.userinput.joys[event.joy].feed_up( event.button )
 
     def draw_fps( self, surface ):
-        font = pygame.font.Font( None, 20 )
+        font = pygame.font.Font( "data/edmunds.ttf", 20 )
         render_text = font.render( str(self.fps), 0, (255,255,255) )
         surface.blit( render_text, (10,10) )
 

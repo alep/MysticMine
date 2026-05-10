@@ -1,5 +1,4 @@
 import copy
-from numpy import array
 
 import pygame
 
@@ -63,9 +62,8 @@ class Surface:
         result = Surface((self.get_width(), self.get_height()))
         result.pysurf = self.pysurf.copy()
 
-        a = pygame.surfarray.pixels_alpha(result.pysurf)
-        b = a * array(alpha)
-        a[:] = b.astype('B')
+        result.pysurf.fill((255, 255, 255, int(alpha * 255)),
+                           special_flags=pygame.BLEND_RGBA_MULT)
 
         return result
 

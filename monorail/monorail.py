@@ -44,10 +44,11 @@ DEFAULT_LANGUAGES += os.environ.get('LC_MESSAGES', '').split(':')
 DEFAULT_LANGUAGES += os.environ.get('LANG', '').split(':')
 DEFAULT_LANGUAGES += ['en_US']
 
-lc, encoding = locale.getdefaultlocale()
-if lc:
-    languages = [lc]
-
+try:
+    lc, encoding = locale.getdefaultlocale()
+except Exception:
+    lc = None
+languages = [lc] if lc else []
 languages += DEFAULT_LANGUAGES
 mo_location = LOCALE_DIR
 
@@ -163,10 +164,8 @@ class Monorail (Game):
         self.max_button.tick( indev, None )
         if self.max_button.went_down():
             self.config.is_fullscreen = not self.config.is_fullscreen
-            if not self.config.is_fullscreen:
-                pygame.display.set_mode(self.config.resolution)
-            else:
-                pygame.display.set_mode(self.config.resolution, pygame.FULLSCREEN)
+            flags = pygame.FULLSCREEN if (self.config.is_fullscreen and sys.platform != "emscripten") else 0
+            pygame.display.set_mode(self.config.resolution, flags)
 
     def render( self, surface, interpol, time_sec ):
         self.state.draw( surface, interpol, time_sec )
@@ -471,7 +470,7 @@ class MonorailEditor:
             pass
 
         # draw filename
-        font = pygame.font.Font( None, 24 )
+        font = pygame.font.Font( "data/edmunds.ttf", 24 )
         render_text = font.render( Level.get_filename( self.level_nr ), 0, (255,255,255) )
         surface.blit( render_text, (100,10) )
 
@@ -544,8 +543,25 @@ def main():
     game = Monorail( configuration )
     game.run()
 
-
     # Make sure latest configuration gets saved
+    configuration.save()
+
+
+async def async_main():
+    """Entry point for pygbag / browser builds."""
+    import asyncio as _asyncio
+
+    os.chdir( script_dir )
+
+    configuration = Configuration.get_instance()
+    SingleSwitch.is_enabled = configuration.one_switch
+    SingleSwitch.scan_timeout = configuration.scan_speed
+
+    app.set_game_speed(configuration.game_speed)
+
+    game = Monorail( configuration )
+    await game._run_async()
+
     configuration.save()
 
 if __name__ == '__main__':

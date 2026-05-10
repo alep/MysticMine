@@ -1,4 +1,5 @@
 
+import sys
 import math
 import random
 
@@ -496,10 +497,8 @@ class OptionsDialog (Dialog):
             if self.fullscreen_btn.went_down():
                 Event.button()
                 self.config.is_fullscreen = not self.config.is_fullscreen
-                if not self.config.is_fullscreen:
-                    pygame.display.set_mode(self.config.resolution)
-                else:
-                    pygame.display.set_mode(self.config.resolution, pygame.FULLSCREEN)
+                flags = pygame.FULLSCREEN if (self.config.is_fullscreen and sys.platform != "emscripten") else 0
+                pygame.display.set_mode(self.config.resolution, flags)
                 self.update_fullscreen_label()
 
             if self.sound_slider.value_changed():

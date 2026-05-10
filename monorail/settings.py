@@ -1,4 +1,5 @@
 
+import sys
 from pickle import *
 import builtins
 import os.path
@@ -328,6 +329,8 @@ class Configuration (object):
         return Configuration.instance
 
     def save( self ):
+        if sys.platform == "emscripten":
+            return
         config_file = open(Configuration.config_name, "wb")
 
         pickler = Pickler(config_file, 2)
