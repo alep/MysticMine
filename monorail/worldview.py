@@ -1,13 +1,15 @@
 
 import random
 
-import koon.gfx as gfx
-import koon.geo as geo
-from koon.res import resman
+import pygame
 
-from playerview import GoldCarView
-import frame as frm
-import tiles
+from .koon import gfx
+from .koon import geo
+from .koon.res import resman
+
+from .playerview import GoldCarView
+from . import frame as frm
+from . import tiles
 
 class LevelView:
 
@@ -18,6 +20,12 @@ class LevelView:
 
     def init_background( self ):
         self.background = gfx.Surface( (800,600) )
+        # Pygame 2/SDL2: blitting SRCALPHA sprites onto a non-SRCALPHA surface
+        # zeroes the destination alpha, making the display transparent to the OS
+        # compositor (macOS shows desktop wallpaper through it). Using SRCALPHA
+        # here ensures the Porter-Duff formula keeps alpha=255 everywhere.
+        self.background.pysurf = pygame.Surface( (800,600), pygame.SRCALPHA )
+        self.background.pysurf.fill( (0, 0, 0, 255) )
         frame = frm.Frame( self.background, 0, 0 )
         frame.X_OFFSET, frame.Y_OFFSET = 20, 300
 

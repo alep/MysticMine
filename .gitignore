@@ -1,4 +1,7 @@
-build/
+build/*
+!build/web-cache/
+build/web-cache/*
+!build/web-cache/*.tmpl
 dist/
 *.pyc
 *.swp

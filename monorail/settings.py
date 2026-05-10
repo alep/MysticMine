@@ -1,21 +1,26 @@
 
-from cPickle import *
+import sys
+from pickle import *
+import builtins
 import os.path
+
+if not hasattr(builtins, '_'):
+    builtins._ = lambda s: s
 
 from pygame.locals import *
 
-import koon.input as input
+from .koon import input
 
-from scenarios import *
-from pickups import *
-from player import *
-import control as ctrl
+from .scenarios import *
+from .pickups import *
+from .player import *
+from . import control as ctrl
 
 
 class GameType (object):
     """Enum of game types"""
 
-    TEST, SINGLE_SEQUENCE, SINGLE_RANDOM, MULTI_RANDOM = range( 4 )
+    TEST, SINGLE_SEQUENCE, SINGLE_RANDOM, MULTI_RANDOM = list(range( 4))
 
 class SkillLevel:
 
@@ -249,7 +254,7 @@ class GameData:
         score = len( playfield.goldcars ) - 1
         for goldcars in playfield.get_goldcar_ranking():
             for goldcar in goldcars:
-                if self.total_scores.has_key( goldcar.nr ):
+                if goldcar.nr in self.total_scores:
                     self.total_scores[goldcar.nr].score += score
                 else:
                     self.total_scores[goldcar.nr] = GoldcarScore( goldcar.nr, score )
@@ -258,8 +263,8 @@ class GameData:
 
     def get_total_ranking( self ):
         """Return a sorted list of goldcars with same score"""
-        single_ranking = self.total_scores.values()[:]
-        single_ranking.sort( lambda a, b: cmp( b.score, a.score ) )
+        single_ranking = list(self.total_scores.values())[:]
+        single_ranking.sort(key=lambda a: a.score, reverse=True)
 
         ranking = []
         prev_score = None
@@ -324,6 +329,8 @@ class Configuration (object):
         return Configuration.instance
 
     def save( self ):
+        if sys.platform == "emscripten":
+            return
         config_file = open(Configuration.config_name, "wb")
 
         pickler = Pickler(config_file, 2)

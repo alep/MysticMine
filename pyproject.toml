@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68", "cython>=3.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.poetry]
+package-mode = false
+
+[project]
+name = "mysticmine"
+version = "1.2.0"
+description = "A fun and addictive single-switch mining game"
+requires-python = ">=3.13"
+dependencies = [
+    "pygame>=2.5",
+    "numpy>=1.26",
+    "cython>=3.0",
+    "pillow>=10.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "setuptools>=68"]
+
+[tool.pytest.ini_options]
+testpaths = ["monorail/tests", "monorail/koon/tests"]

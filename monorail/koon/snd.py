@@ -1,16 +1,34 @@
 
+import sys
 import pygame
 import pygame.mixer as mixer
 
+_SILENT = sys.platform == "emscripten"
+
 def pre_init():
+    if _SILENT: return
     mixer.pre_init(22050, -16, 2, 2048)
 
 def init():
+    if _SILENT: return
     mixer.init()
     pygame.mixer.set_num_channels(16)
 
 def deinit():
+    if _SILENT: return
     mixer.quit()
+
+
+class _SilentSound:
+    """Stub returned when a sound file can't be loaded (e.g. missing in WASM)."""
+    def set_volume(self, v): pass
+    def play(self, loop=0): return _SilentChannel()
+    def stop(self): pass
+    def fadeout(self, ms): pass
+
+
+class _SilentChannel:
+    def get_sound(self): return None
 
 
 class Music (object):
@@ -24,7 +42,10 @@ class Music (object):
             self.load( filename )
 
     def load( self, filename ):
-        self.sound = mixer.Sound( filename )
+        try:
+            self.sound = mixer.Sound( filename )
+        except Exception:
+            self.sound = _SilentSound()
 
     def play( self, loop = -1 ):
         self.sound.set_volume( Music.our_music_volume )
@@ -65,7 +86,10 @@ class Sound (object):
             self.load( filename )
 
     def load( self, filename ):
-        self.sound = mixer.Sound( filename )
+        try:
+            self.sound = mixer.Sound( filename )
+        except Exception:
+            self.sound = _SilentSound()
 
     def play( self, loop = 0 ):
         """for infiniteloop, set loop to -1"""
